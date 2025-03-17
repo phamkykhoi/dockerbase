@@ -1,0 +1,119 @@
+services:
+  # Application
+  app:
+    build:
+      context: ./docker/services/app
+      dockerfile: app.dockerfile
+    working_dir: /var/www
+    volumes:
+      - ${APP_CODE_PATH_HOST}:/var/www
+  nginx:
+    build:
+      context: ./docker/services/nginx
+      dockerfile: nginx.dockerfile
+    working_dir: /var/www
+    volumes:
+      - ${APP_CODE_PATH_HOST}:/var/www
+    ports:
+      - "80:80"
+  php82:
+    build:
+      context: ./docker/services/php8.2
+      dockerfile: app.dockerfile
+    working_dir: /var/www
+    volumes:
+      - ${APP_CODE_PATH_HOST}:/var/www
+  php74:
+    build:
+      context: ./docker/services/php7.4
+      dockerfile: app.dockerfile
+    working_dir: /var/www
+    volumes:
+      - ${APP_CODE_PATH_HOST}:/var/www
+  # Database
+  database:
+    platform: linux/x86_64
+    image: mysql:5.7
+    container_name: database
+    restart: always
+    volumes:
+      - ./docker/volumes/mysql:/var/lib/mysql
+    environment:
+      MYSQL_USER: ${DB_USERNAME}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+    ports:
+      - "3307:3306"
+  mysqllatest:
+      image: mysql:latest
+      container_name: mysqllatest
+      platform: linux/x86_64
+      restart: always
+      environment:
+        MYSQL_USER: ${DB_USERNAME}
+        MYSQL_PASSWORD: ${DB_PASSWORD}
+        MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      volumes:
+        - ./docker/volumes/mysqllatest:/var/lib/mysql
+      ports:
+        - "3308:3306"
+  #minio file management
+  minio:
+    image: minio/minio:latest
+    container_name: minio
+    restart: always
+    command:
+        - server
+        - --console-address
+        - :9001
+        - /data
+    ports:
+        - 9000:9000
+        - 9001:9001
+    environment:
+        MINIO_ACCESS_KEY: ${AWS_ACCESS_KEY_ID}
+        MINIO_SECRET_KEY: ${AWS_SECRET_ACCESS_KEY}
+        MINIO_REGION_NAME: ${AWS_DEFAULT_REGION}
+        MINIO_DEFAULT_BUCKETS: ${AWS_BUCKET}
+    volumes:
+        - ./docker/minio/data:/data
+  # Postgress
+  pgsql:
+    image: postgres
+    restart: always
+    environment:
+      PGPASSWORD: '${DC_DB_PASSWORD:-secret}'
+      POSTGRES_DB: '${DC_DB_DATABASE}'
+      POSTGRES_USER: '${DC_DB_USERNAME}'
+      POSTGRES_PASSWORD: '${DC_DB_PASSWORD:-secret}'
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready"]
+      interval: 1s
+      timeout: 5s
+      retries: 10
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 8081:8080
+
+  #phpmyadmin
+  phpmyadmin:
+    build: ./docker/services/phpmyadmin
+    environment:
+      PMA_ARBITRARY: 1
+      MYSQL_USER: ${DB_USERNAME}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      UPLOAD_LIMIT: 100000M
+    ports:
+      - "8888:80"
+    depends_on:
+      - "database"
+  # Caching
+  redis:
+    image: redis:alpine
+    volumes:
+      - ./docker/volumes/redis:/data
+    ports:
+      - "6378:6379"

@@ -1,0 +1,44 @@
+FROM php:7.4-fpm
+RUN apt-get update && apt-get install -y \
+		libfreetype6-dev \
+		libjpeg62-turbo-dev \
+		libpng-dev \
+        libicu-dev \
+	&& docker-php-ext-configure gd --with-freetype --with-jpeg \
+	&& docker-php-ext-install -j$(nproc) gd
+
+# Multibyte String
+RUN apt-get update && apt-get install -y libonig-dev && docker-php-ext-install mbstring
+
+RUN docker-php-ext-install gd
+
+RUN docker-php-ext-configure intl & docker-php-ext-install intl
+
+COPY --from=mlocati/php-extension-installer /usr/bin/install-php-extensions /usr/bin/
+
+RUN install-php-extensions zip
+
+RUN docker-php-ext-install mysqli pdo pdo_mysql && docker-php-ext-enable pdo_mysql
+
+# Install dependencies and the intl extension
+RUN apt-get update && \
+    apt-get install -y libicu-dev && \
+    docker-php-ext-install intl && \
+    docker-php-ext-enable intl
+
+# Miscellaneous
+RUN docker-php-ext-install bcmath
+RUN docker-php-ext-install exif
+RUN docker-php-ext-install pdo_mysql
+
+RUN echo "file_uploads = On\n" \
+    "memory_limit = 1000048MM\n" \
+    "upload_max_filesize = 500M\n" \
+    "post_max_size = 500M\n" \
+    "max_execution_time = 600\n" \
+    > /usr/local/etc/php/conf.d/uploads.ini
+	
+# Install Composer
+RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+
+CMD bash -c "php-fpm"
