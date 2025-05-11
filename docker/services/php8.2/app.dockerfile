@@ -46,7 +46,6 @@ RUN docker-php-ext-install pdo_mysql
 RUN docker-php-ext-enable mbstring
 RUN docker-php-ext-enable exif
 
-RUN apt-get install -y ffmpeg
 RUN apt-get install -y libpq-dev \
     && docker-php-ext-configure pgsql -with-pgsql=/usr/local/pgsql \
     && docker-php-ext-install pdo pdo_pgsql pgsql

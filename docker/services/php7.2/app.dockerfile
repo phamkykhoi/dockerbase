@@ -27,14 +27,4 @@ RUN echo "file_uploads = On\n" \
 # Install Composer
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
-# Install specific version of Node.js with npm through nvm
-SHELL ["/bin/bash", "--login", "-c"]
-RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash
-RUN nvm install --lts
-
-# Install Cron
-RUN apt-get update && apt-get install -y cron
-RUN echo "* * * * * root php /var/www/artisan schedule:run >> /var/log/cron.log 2>&1" >> /etc/crontab
-RUN touch /var/log/cron.log
-
 CMD bash -c "cron && php-fpm"

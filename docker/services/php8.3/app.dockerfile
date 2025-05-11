@@ -1,13 +1,11 @@
-FROM php:8.1-fpm
+FROM php:8.4-fpm
 
 WORKDIR /var/www
 
 RUN apt-get update && apt-get install -y \
     build-essential \
     curl \
-    unzip \
-    vim \
-    zip
+    unzip
 
 COPY --from=mlocati/php-extension-installer /usr/bin/install-php-extensions /usr/bin/
 
@@ -32,6 +30,7 @@ RUN apt-get update && apt-get install -y libonig-dev && docker-php-ext-install m
 RUN set -x && \
     apt-get update && \
     apt-get install -y libicu-dev && \
+    docker-php-ext-configure intl && \
     docker-php-ext-install intl
 
 # Miscellaneous
@@ -43,9 +42,6 @@ RUN docker-php-ext-install pdo_mysql
 RUN docker-php-ext-enable mbstring
 RUN docker-php-ext-enable exif
 
-RUN apt-get install -y ffmpeg
-
-RUN apt-get install -y ffmpeg
 RUN apt-get install -y libpq-dev \
     && docker-php-ext-configure pgsql -with-pgsql=/usr/local/pgsql \
     && docker-php-ext-install pdo pdo_pgsql pgsql

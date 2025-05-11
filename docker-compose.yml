@@ -1,5 +1,6 @@
 services:
   # Application
+  #php8.1
   app:
     build:
       context: ./docker/services/app
@@ -19,6 +20,13 @@ services:
   php82:
     build:
       context: ./docker/services/php8.2
+      dockerfile: app.dockerfile
+    working_dir: /var/www
+    volumes:
+      - ${APP_CODE_PATH_HOST}:/var/www
+  php83:
+    build:
+      context: ./docker/services/php8.3
       dockerfile: app.dockerfile
     working_dir: /var/www
     volumes:

@@ -20,6 +20,10 @@ function _php82() {
   docker-compose --env-file .env exec php82 bash
 }
 
+function _php83() {
+  docker-compose --env-file .env exec php83 bash
+}
+
 function _php74() {
   docker-compose --env-file .env exec php74 bash
 }
@@ -30,5 +34,6 @@ case $1 in
   "rebuild") _rebuild ;;
   "ssh") _ssh ;;
   "php82") _php82 ;;
+  "php83") _php82 ;;
   "php74") _php74 ;;
 esac
