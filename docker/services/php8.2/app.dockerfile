@@ -18,6 +18,14 @@ RUN pecl install redis && docker-php-ext-enable redis
 # Clear cache
 RUN apt-get clean && rm -rf /var/lib/apt/lists/*
 
+# Soap
+RUN apt-get update && apt-get install -y libxml2-dev \
+    && docker-php-ext-install soap
+
+# XSL (needed by veewee/xml used in codedredd/laravel-soap)
+RUN apt-get update && apt-get install -y libxslt1-dev \
+    && docker-php-ext-install xsl
+
 # Install PHP extensions
 # Graphics Draw
 RUN apt-get update && apt-get install -y \
