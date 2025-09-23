@@ -19,7 +19,9 @@ volumes:
 ```
 APP_CODE_PATH_HOST/
 ├── EnglishTemplate/          # Project 1
-│   ├── index.php
+│   ├── public/               # Subfolder (Laravel, Symfony, etc.)
+│   │   ├── index.php
+│   │   └── ...
 │   └── ...
 ├── myproject/                # Project 2
 │   ├── index.php
@@ -31,9 +33,14 @@ APP_CODE_PATH_HOST/
 ```
 /var/www/
 ├── EnglishTemplate/          # Bind từ APP_CODE_PATH_HOST/EnglishTemplate
+│   └── public/               # Có thể sử dụng làm root directory
 ├── myproject/                # Bind từ APP_CODE_PATH_HOST/myproject
 └── ...
 ```
+
+**Ví dụ cấu hình Nginx:**
+- **Project thường**: `root /var/www/myproject;`
+- **Project với subfolder**: `root /var/www/EnglishTemplate/public;`
 
 ## 📋 Các Scripts Có Sẵn
 
@@ -69,11 +76,10 @@ Tạo project hoàn chỉnh bao gồm thư mục, file cấu hình Nginx và reb
 ```
 
 **Tính năng:**
-- ✅ Tạo thư mục project
-- ✅ Tạo file `index.php` mẫu
 - ✅ Tạo file cấu hình Nginx
 - ✅ Rebuild và restart Nginx container
 - ✅ Hiển thị hướng dẫn tiếp theo
+- ✅ Không tạo thư mục - chỉ tạo cấu hình
 
 ### 3. `create-project-folder.sh` - Tạo thư mục project
 
@@ -138,10 +144,10 @@ Rebuild và restart Nginx container.
 
 ### Cách 1: Setup hoàn chỉnh (Khuyến nghị)
 ```bash
-# 1. Tạo thư mục project trong APP_CODE_PATH_HOST
+# 1. Tạo thư mục project trong APP_CODE_PATH_HOST (nếu cần)
 ./create-project-folder.sh myapp
 
-# 2. Setup project hoàn chỉnh
+# 2. Setup project hoàn chỉnh (chỉ tạo cấu hình Nginx)
 ./setup-project.sh myapp myapp.dev.com php82
 
 # 3. Thêm vào /etc/hosts
@@ -170,6 +176,18 @@ echo "127.0.0.1 myapp.dev.com" | sudo tee -a /etc/hosts
 ```bash
 # Nếu thư mục project đã tồn tại trong APP_CODE_PATH_HOST
 ./setup-project.sh EnglishTemplate quiz.dev.com php82
+```
+
+### Cách 4: Sử dụng subfolder (Laravel, Symfony, etc.)
+```bash
+# Sử dụng thư mục public làm root directory (chỉ tạo cấu hình)
+./setup-project.sh EnglishTemplate/public litlecat.dev.com php84
+```
+
+### Cách 5: Chỉ tạo cấu hình (Không tạo thư mục)
+```bash
+# Chỉ tạo cấu hình Nginx, không tạo thư mục hay file
+./setup-project.sh existing-project existing.dev.com php82
 ```
 
 ## 📁 Cấu Trúc File Cấu Hình

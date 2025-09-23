@@ -16,39 +16,24 @@ ROOT_FOLDER=$1
 SERVER_NAME=$2
 PHP_VERSION=$3
 
-echo "🚀 Đang setup project: $ROOT_FOLDER"
+# Tách project name và subfolder nếu có
+if [[ "$ROOT_FOLDER" == *"/"* ]]; then
+    PROJECT_NAME=$(echo "$ROOT_FOLDER" | cut -d'/' -f1)
+    SUBFOLDER=$(echo "$ROOT_FOLDER" | cut -d'/' -f2-)
+    echo "🚀 Đang setup project: $PROJECT_NAME"
+    echo "📁 Subfolder: $SUBFOLDER"
+else
+    PROJECT_NAME="$ROOT_FOLDER"
+    SUBFOLDER=""
+    echo "🚀 Đang setup project: $PROJECT_NAME"
+fi
+
 echo "🌐 Domain: $SERVER_NAME"
 echo "🐘 PHP Version: $PHP_VERSION"
 echo ""
 
-# 1. Kiểm tra thư mục project có tồn tại không
-echo "📁 Kiểm tra thư mục project..."
-if [ ! -d "$ROOT_FOLDER" ]; then
-    echo "⚠️  Thư mục $ROOT_FOLDER không tồn tại!"
-    echo "💡 Vui lòng tạo thư mục project trước: mkdir -p $ROOT_FOLDER"
-    exit 1
-fi
-echo "✅ Thư mục project đã tồn tại: $ROOT_FOLDER"
-
-# 2. Tạo file index.php mẫu (nếu chưa có)
-echo "📄 Kiểm tra file index.php..."
-if [ ! -f "$ROOT_FOLDER/index.php" ]; then
-    echo "📄 Tạo file index.php mẫu..."
-    cat > "$ROOT_FOLDER/index.php" << EOF
-<?php
-echo "<h1>Welcome to $SERVER_NAME</h1>";
-echo "<p>Project: $ROOT_FOLDER</p>";
-echo "<p>PHP Version: " . PHP_VERSION . "</p>";
-echo "<p>Server Time: " . date('Y-m-d H:i:s') . "</p>";
-echo "<hr>";
-echo "<h2>PHP Info</h2>";
-echo "<a href='/phpinfo.php'>View PHP Info</a>";
-?>
-EOF
-    echo "✅ Đã tạo file index.php"
-else
-    echo "✅ File index.php đã tồn tại"
-fi
+# 1. Bỏ qua việc kiểm tra thư mục - chỉ tạo cấu hình
+echo "📁 Bỏ qua việc kiểm tra thư mục - chỉ tạo cấu hình Nginx"
 
 # 3. Tạo file cấu hình Nginx
 echo "⚙️  Tạo file cấu hình Nginx..."
@@ -70,7 +55,10 @@ echo ""
 echo "✅ Project setup hoàn tất!"
 echo ""
 echo "📋 Thông tin project:"
-echo "   - Thư mục: $ROOT_FOLDER"
+echo "   - Project: $PROJECT_NAME"
+if [ -n "$SUBFOLDER" ]; then
+    echo "   - Subfolder: $SUBFOLDER"
+fi
 echo "   - Domain: $SERVER_NAME"
 echo "   - PHP Version: $PHP_VERSION"
 echo "   - URL: http://$SERVER_NAME"
@@ -78,8 +66,7 @@ echo ""
 echo "🔧 Các bước tiếp theo:"
 echo "   1. Thêm vào /etc/hosts: 127.0.0.1 $SERVER_NAME"
 echo "   2. Truy cập: http://$SERVER_NAME"
-echo "   3. Bắt đầu phát triển trong thư mục: $ROOT_FOLDER"
-echo "   4. Thư mục được bind từ: \${APP_CODE_PATH_HOST}/$ROOT_FOLDER"
+echo "   3. Đảm bảo thư mục tồn tại: \${APP_CODE_PATH_HOST}/$ROOT_FOLDER"
 echo ""
 echo "💡 Lệnh hữu ích:"
 echo "   - Vào container PHP: docker-compose exec $PHP_VERSION bash"

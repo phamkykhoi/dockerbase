@@ -18,6 +18,18 @@ ROOT_FOLDER=$1
 SERVER_NAME=$2
 PHP_VERSION=$3
 
+# Tách project name và subfolder nếu có
+if [[ "$ROOT_FOLDER" == *"/"* ]]; then
+    PROJECT_NAME=$(echo "$ROOT_FOLDER" | cut -d'/' -f1)
+    SUBFOLDER=$(echo "$ROOT_FOLDER" | cut -d'/' -f2-)
+    echo "📁 Project: $PROJECT_NAME"
+    echo "📁 Subfolder: $SUBFOLDER"
+else
+    PROJECT_NAME="$ROOT_FOLDER"
+    SUBFOLDER=""
+    echo "📁 Project: $PROJECT_NAME"
+fi
+
 # Kiểm tra phiên bản PHP hợp lệ
 case $PHP_VERSION in
     php73|php74|php81|php82|php83|php84)
