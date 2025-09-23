@@ -2,6 +2,39 @@
 
 Bộ công cụ quản lý cấu hình Nginx cho Docker environment với nhiều phiên bản PHP.
 
+## 📁 Cấu Trúc Thư Mục
+
+Docker environment sử dụng `APP_CODE_PATH_HOST` từ file `.env` để bind thư mục host vào container:
+
+```bash
+# Trong .env
+APP_CODE_PATH_HOST=/Users/khoipham/Data/Projects
+
+# Trong docker-compose.yml
+volumes:
+  - ${APP_CODE_PATH_HOST}:/var/www
+```
+
+**Cấu trúc thư mục:**
+```
+APP_CODE_PATH_HOST/
+├── EnglishTemplate/          # Project 1
+│   ├── index.php
+│   └── ...
+├── myproject/                # Project 2
+│   ├── index.php
+│   └── ...
+└── ...
+```
+
+**Trong container:**
+```
+/var/www/
+├── EnglishTemplate/          # Bind từ APP_CODE_PATH_HOST/EnglishTemplate
+├── myproject/                # Bind từ APP_CODE_PATH_HOST/myproject
+└── ...
+```
+
 ## 📋 Các Scripts Có Sẵn
 
 ### 1. `create-nginx-config.sh` - Tạo file cấu hình Nginx
@@ -42,7 +75,26 @@ Tạo project hoàn chỉnh bao gồm thư mục, file cấu hình Nginx và reb
 - ✅ Rebuild và restart Nginx container
 - ✅ Hiển thị hướng dẫn tiếp theo
 
-### 3. `nginx-manager.sh` - Quản lý cấu hình Nginx
+### 3. `create-project-folder.sh` - Tạo thư mục project
+
+Tạo thư mục project trong APP_CODE_PATH_HOST với các file mẫu.
+
+```bash
+./create-project-folder.sh <project_name>
+```
+
+**Ví dụ:**
+```bash
+./create-project-folder.sh EnglishTemplate
+```
+
+**Tính năng:**
+- ✅ Tạo thư mục project trong APP_CODE_PATH_HOST
+- ✅ Tạo file `index.php` mẫu
+- ✅ Tạo file `.gitignore` mẫu
+- ✅ Hiển thị đường dẫn và hướng dẫn tiếp theo
+
+### 4. `nginx-manager.sh` - Quản lý cấu hình Nginx
 
 Script quản lý tổng thể cho các file cấu hình Nginx.
 
@@ -86,20 +138,23 @@ Rebuild và restart Nginx container.
 
 ### Cách 1: Setup hoàn chỉnh (Khuyến nghị)
 ```bash
-# Tạo project hoàn chỉnh
+# 1. Tạo thư mục project trong APP_CODE_PATH_HOST
+./create-project-folder.sh myapp
+
+# 2. Setup project hoàn chỉnh
 ./setup-project.sh myapp myapp.dev.com php82
 
-# Thêm vào /etc/hosts
+# 3. Thêm vào /etc/hosts
 echo "127.0.0.1 myapp.dev.com" | sudo tee -a /etc/hosts
 
-# Truy cập project
+# 4. Truy cập project
 open http://myapp.dev.com
 ```
 
 ### Cách 2: Tạo từng bước
 ```bash
-# 1. Tạo thư mục project
-mkdir myapp
+# 1. Tạo thư mục project trong APP_CODE_PATH_HOST
+./create-project-folder.sh myapp
 
 # 2. Tạo file cấu hình Nginx
 ./create-nginx-config.sh myapp myapp.dev.com php82
@@ -109,6 +164,12 @@ mkdir myapp
 
 # 4. Thêm vào /etc/hosts
 echo "127.0.0.1 myapp.dev.com" | sudo tee -a /etc/hosts
+```
+
+### Cách 3: Sử dụng thư mục có sẵn
+```bash
+# Nếu thư mục project đã tồn tại trong APP_CODE_PATH_HOST
+./setup-project.sh EnglishTemplate quiz.dev.com php82
 ```
 
 ## 📁 Cấu Trúc File Cấu Hình
