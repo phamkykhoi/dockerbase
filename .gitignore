@@ -1,19 +1,20 @@
+# Nginx configuration files
 docker/services/nginx/sites/*.conf
 
-!docker/volumes/mysql
-docker/volumes/mysql/*
-!docker/volumes/mysql/.gitkeep
-
-!docker/volumes/redis
-docker/volumes/redis/*
-docker/volumes/redis/*
-!docker/volumes/redis/.gitkeep
-!docker/volumes/redis/.gitkeep
+# MinIO data
 docker/minio/data/*
 
-!docker/volumes/mysqllatest
-docker/volumes/mysqllatest/*
-!docker/volumes/mysqllatest/.gitkeep
+# Docker volumes - ignore all data but keep structure
+docker/volumes/*
+
+# Keep .gitkeep files for empty directories
+!docker/volumes/.gitkeep
+!docker/volumes/*/.gitkeep
+
+# System files
 .DS_Store
 .idea
 .env
+
+# Logs
+*.log
