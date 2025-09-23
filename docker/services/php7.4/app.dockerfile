@@ -1,43 +1,46 @@
 FROM php:7.4-fpm
+
+WORKDIR /var/www
+
+# Install system dependencies and PHP extensions in one layer
 RUN apt-get update && apt-get install -y \
-		libfreetype6-dev \
-		libjpeg62-turbo-dev \
-		libpng-dev \
-        libicu-dev \
-	&& docker-php-ext-configure gd --with-freetype --with-jpeg \
-	&& docker-php-ext-install -j$(nproc) gd
+    build-essential \
+    curl \
+    unzip \
+    libxml2-dev \
+    libxslt1-dev \
+    libfreetype6-dev \
+    libjpeg62-turbo-dev \
+    libpng-dev \
+    zlib1g-dev \
+    libonig-dev \
+    libicu-dev \
+    libpq-dev \
+    && docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-install -j$(nproc) gd \
+    && docker-php-ext-install soap xsl mbstring intl bcmath exif pdo_mysql \
+    && docker-php-ext-configure intl \
+    && docker-php-ext-configure pgsql -with-pgsql=/usr/local/pgsql \
+    && docker-php-ext-install pdo pdo_pgsql pgsql \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Multibyte String
-RUN apt-get update && apt-get install -y libonig-dev && docker-php-ext-install mbstring
-
-RUN docker-php-ext-install gd
-
-RUN docker-php-ext-configure intl & docker-php-ext-install intl
-
+# Install PHP extension installer and extensions
 COPY --from=mlocati/php-extension-installer /usr/bin/install-php-extensions /usr/bin/
-
 RUN install-php-extensions zip
 
-RUN docker-php-ext-install mysqli pdo pdo_mysql && docker-php-ext-enable pdo_mysql
+# Redis extension
+RUN pecl install redis && docker-php-ext-enable redis
 
-# Install dependencies and the intl extension
-RUN apt-get update && \
-    apt-get install -y libicu-dev && \
-    docker-php-ext-install intl && \
-    docker-php-ext-enable intl
-
-# Miscellaneous
-RUN docker-php-ext-install bcmath
-RUN docker-php-ext-install exif
-RUN docker-php-ext-install pdo_mysql
-
+# Enable extensions
+RUN docker-php-ext-enable mbstring exif
+    
 RUN echo "file_uploads = On\n" \
-    "memory_limit = 1000048MM\n" \
+    "memory_limit = 10000M\n" \
     "upload_max_filesize = 500M\n" \
-    "post_max_size = 500M\n" \
+    "post_max_size = 1000M\n" \
     "max_execution_time = 600\n" \
     > /usr/local/etc/php/conf.d/uploads.ini
-	
+
 # Install Composer
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 

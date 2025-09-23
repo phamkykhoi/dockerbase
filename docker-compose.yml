@@ -1,13 +1,5 @@
 services:
-  # Application
-  #php8.1
-  app:
-    build:
-      context: ./docker/services/app
-      dockerfile: app.dockerfile
-    working_dir: /var/www
-    volumes:
-      - ${APP_CODE_PATH_HOST}:/var/www
+  # Nginx Web Server
   nginx:
     build:
       context: ./docker/services/nginx
@@ -17,20 +9,25 @@ services:
       - ${APP_CODE_PATH_HOST}:/var/www
     ports:
       - "80:80"
-  php82:
+    depends_on:
+      - php73
+      - php74
+      - php81
+      - php82
+      - php83
+      - php84
+
+  # PHP Services
+  php73:
     build:
-      context: ./docker/services/php8.2
+      context: ./docker/services/php7.3
       dockerfile: app.dockerfile
     working_dir: /var/www
     volumes:
       - ${APP_CODE_PATH_HOST}:/var/www
-  php83:
-    build:
-      context: ./docker/services/php8.3
-      dockerfile: app.dockerfile
-    working_dir: /var/www
-    volumes:
-      - ${APP_CODE_PATH_HOST}:/var/www
+    environment:
+      - PHP_VERSION=7.3
+
   php74:
     build:
       context: ./docker/services/php7.4
@@ -38,33 +35,91 @@ services:
     working_dir: /var/www
     volumes:
       - ${APP_CODE_PATH_HOST}:/var/www
-  # Database
-  database:
+    environment:
+      - PHP_VERSION=7.4
+
+  php81:
+    build:
+      context: ./docker/services/php8.1
+      dockerfile: app.dockerfile
+    working_dir: /var/www
+    volumes:
+      - ${APP_CODE_PATH_HOST}:/var/www
+    environment:
+      - PHP_VERSION=8.1
+
+  php82:
+    build:
+      context: ./docker/services/php8.2
+      dockerfile: app.dockerfile
+    working_dir: /var/www
+    volumes:
+      - ${APP_CODE_PATH_HOST}:/var/www
+    environment:
+      - PHP_VERSION=8.2
+
+  php83:
+    build:
+      context: ./docker/services/php8.3
+      dockerfile: app.dockerfile
+    working_dir: /var/www
+    volumes:
+      - ${APP_CODE_PATH_HOST}:/var/www
+    environment:
+      - PHP_VERSION=8.3
+
+  php84:
+    build:
+      context: ./docker/services/php8.4
+      dockerfile: app.dockerfile
+    working_dir: /var/www
+    volumes:
+      - ${APP_CODE_PATH_HOST}:/var/www
+    environment:
+      - PHP_VERSION=8.4
+  # MySQL Databases - Version 5.7 and 8.x
+  mysql57:
     platform: linux/x86_64
     image: mysql:5.7
-    container_name: database
+    container_name: mysql57
     restart: always
     volumes:
-      - ./docker/volumes/mysql:/var/lib/mysql
+      - ./docker/volumes/mysql57:/var/lib/mysql
     environment:
       MYSQL_USER: ${DB_USERNAME}
       MYSQL_PASSWORD: ${DB_PASSWORD}
       MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
     ports:
       - "3307:3306"
-  mysqllatest:
-      image: mysql:latest
-      container_name: mysqllatest
-      platform: linux/x86_64
-      restart: always
-      environment:
-        MYSQL_USER: ${DB_USERNAME}
-        MYSQL_PASSWORD: ${DB_PASSWORD}
-        MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
-      volumes:
-        - ./docker/volumes/mysqllatest:/var/lib/mysql
-      ports:
-        - "3308:3306"
+
+  mysql8:
+    platform: linux/x86_64
+    image: mysql:8.0
+    container_name: mysql8
+    restart: always
+    volumes:
+      - ./docker/volumes/mysql8:/var/lib/mysql
+    environment:
+      MYSQL_USER: ${DB_USERNAME}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+    ports:
+      - "3308:3306"
+
+  # Legacy support - keep old names for backward compatibility
+  # database:
+  #   platform: linux/x86_64
+  #   image: mysql:5.7
+  #   container_name: database
+  #   restart: always
+  #   volumes:
+  #     - ./docker/volumes/mysql:/var/lib/mysql
+  #   environment:
+  #     MYSQL_USER: ${DB_USERNAME}
+  #     MYSQL_PASSWORD: ${DB_PASSWORD}
+  #     MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+  #   ports:
+  #     - "3307:3306"
   #minio file management
   minio:
     image: minio/minio:latest
@@ -117,7 +172,7 @@ services:
     ports:
       - "8888:80"
     depends_on:
-      - "database"
+      - "mysql57"
   # Caching
   redis:
     image: redis:alpine

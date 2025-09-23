@@ -34,6 +34,6 @@ case $1 in
   "rebuild") _rebuild ;;
   "ssh") _ssh ;;
   "php82") _php82 ;;
-  "php83") _php82 ;;
+  "php83") _php83 ;;
   "php74") _php74 ;;
 esac

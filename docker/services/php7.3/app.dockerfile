@@ -1,27 +1,41 @@
 FROM php:7.3-fpm
 
-# RUN apt-get -y install gcc make autoconf libc-dev pkg-config libzip-dev
+WORKDIR /var/www
 
-RUN apt-get update && apt-get install -y
+# Install system dependencies and PHP extensions in one layer
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    curl \
+    unzip \
+    libxml2-dev \
+    libxslt1-dev \
+    libonig-dev \
+    libicu-dev \
+    libpq-dev \
+    && docker-php-ext-install soap xsl mbstring intl bcmath exif pdo_mysql \
+    && docker-php-ext-configure intl \
+    && docker-php-ext-configure pgsql -with-pgsql=/usr/local/pgsql \
+    && docker-php-ext-install pdo pdo_pgsql pgsql \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
 
+# Install PHP extension installer and extensions
 COPY --from=mlocati/php-extension-installer /usr/bin/install-php-extensions /usr/bin/
-
-# # Miscellaneous
-RUN docker-php-ext-install bcmath
-RUN docker-php-ext-install exif
-RUN docker-php-ext-install pdo_mysql
 RUN install-php-extensions zip
 
-RUN docker-php-ext-install mysqli pdo pdo_mysql && docker-php-ext-enable pdo_mysql
+# Redis extension for PHP 7.3 (older version)
+RUN pecl install redis-5.3.7 && docker-php-ext-enable redis
 
+# Enable extensions
+RUN docker-php-ext-enable mbstring exif
+    
 RUN echo "file_uploads = On\n" \
-    "memory_limit = 500M\n" \
+    "memory_limit = 10000M\n" \
     "upload_max_filesize = 500M\n" \
-    "post_max_size = 500M\n" \
+    "post_max_size = 1000M\n" \
     "max_execution_time = 600\n" \
     > /usr/local/etc/php/conf.d/uploads.ini
-    
+
 # Install Composer
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
-CMD bash -c "cron && php-fpm"
+CMD bash -c "php-fpm"
