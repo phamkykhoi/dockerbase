@@ -1,7 +1,7 @@
 FROM nginx:1.21
 
 # Copy nginx configuration files
-COPY ./sites/php-switch.conf /etc/nginx/conf.d/default.conf
+COPY ./sites/*.conf /etc/nginx/conf.d/
 
 # Copy phpinfo file for testing
 COPY ./phpinfo.php /var/www/phpinfo.php
