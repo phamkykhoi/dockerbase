@@ -31,14 +31,6 @@ docker image prune -f
 echo "🌐 Xóa networks không sử dụng..."
 docker network prune -f
 
-# Xóa volumes không sử dụng (cẩn thận!)
-if [ "$FORCE_MODE" = "--force" ]; then
-    echo "💾 Xóa volumes không sử dụng (FORCE MODE)..."
-    docker volume prune -f
-else
-    echo "💾 Bỏ qua volumes (sử dụng --force để xóa volumes)"
-fi
-
 # Xóa build cache
 echo "🔨 Xóa build cache..."
 docker builder prune -f
