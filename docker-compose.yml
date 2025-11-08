@@ -142,18 +142,24 @@ services:
         - ./docker/minio/data:/data
   # Postgress
   pgsql:
+    platform: linux/x86_64
     image: postgres
+    container_name: docker-base-pgsql
     restart: always
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgsql_data:/var/lib/postgresql
     environment:
       PGPASSWORD: '${DC_DB_PASSWORD:-secret}'
-      POSTGRES_DB: '${DC_DB_DATABASE}'
-      POSTGRES_USER: '${DC_DB_USERNAME}'
+      POSTGRES_DB: '${DC_DB_DATABASE:-laravel}'
+      POSTGRES_USER: '${DC_DB_USERNAME:-sail}'
       POSTGRES_PASSWORD: '${DC_DB_PASSWORD:-secret}'
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready"]
-      interval: 1s
+      test: ["CMD-SHELL", "pg_isready -U ${DC_DB_USERNAME:-sail} -d ${DC_DB_DATABASE:-laravel}"]
+      interval: 5s
       timeout: 5s
-      retries: 10
+      retries: 5
   adminer:
     image: adminer
     restart: always
@@ -180,3 +186,6 @@ services:
       - ./docker/volumes/redis:/data
     ports:
       - "6378:6379"
+
+volumes:
+  pgsql_data:

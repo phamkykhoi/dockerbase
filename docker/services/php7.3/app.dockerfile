@@ -12,7 +12,7 @@ RUN apt-get update && apt-get install -y \
     libonig-dev \
     libicu-dev \
     libpq-dev \
-    && docker-php-ext-install soap xsl mbstring intl bcmath exif pdo_mysql \
+    && docker-php-ext-install soap xsl mbstring intl bcmath exif pdo_mysql pcntl \
     && docker-php-ext-configure intl \
     && docker-php-ext-configure pgsql -with-pgsql=/usr/local/pgsql \
     && docker-php-ext-install pdo pdo_pgsql pgsql \
